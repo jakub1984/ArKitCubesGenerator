@@ -14,21 +14,69 @@ class ViewController: UIViewController, ARSCNViewDelegate {
 
     @IBOutlet var sceneView: ARSCNView!
     
+    var maxHeight : CGFloat = 0.6
+    var minHeight : CGFloat = 0.3
+    var maxDistance : CGFloat = 0
+    var minDistance : CGFloat = -3
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        // Set the view's delegate
         sceneView.delegate = self
-        
-        // Show statistics such as fps and timing information
         sceneView.showsStatistics = true
-        
-        // Create a new scene
-        let scene = SCNScene(named: "art.scnassets/ship.scn")!
-        
-        // Set the scene to the view
-        sceneView.scene = scene
     }
+    
+    func getRandomVector() -> SCNVector3 {
+        return SCNVector3(getRandomDistance(),
+                          getRandomDistance(),
+                          getRandomDistance())
+    }
+    
+    func getRandomSize() -> CGFloat {
+        return CGFloat.random(in: minHeight ... maxHeight)
+    }
+    
+    func getRandomDistance() -> CGFloat {
+        return CGFloat.random(in: minDistance ... maxDistance)
+    }
+    
+    func getRandomColor() -> UIColor {
+        return UIColor.init(red: CGFloat.random(in: 0 ... 1),
+                            green: CGFloat.random(in: 0...1),
+                            blue: CGFloat.random(in: 0...1),
+                            alpha: CGFloat.random(in: 0.5...1))
+    }
+    
+    func generateRandomCube() {
+        let cubeSize = getRandomSize()
+        let cube = SCNBox(width: cubeSize, height: cubeSize, length: cubeSize, chamferRadius: 0.03)
+
+//        Longer definition of materials
+//        let material = SCNMaterial()
+//        material.diffuse.contents = getRandomColor()
+//        cube.materials = [material]
+//
+//        Shorter for only one material:
+        cube.materials.first?.diffuse.contents = getRandomColor()
+        
+        let cubeNode = SCNNode(geometry: cube)
+        cubeNode.position = getRandomVector()
+        let rotateAction = SCNAction.rotateBy(x: CGFloat.random(in: 0 ... 2) * .pi,
+                                              y: CGFloat.random(in: 0 ... 2) * .pi,
+                                              z: 0,
+                                              duration: 3)
+        let repeateRotateAction = SCNAction.repeatForever(rotateAction)
+        cubeNode.runAction(repeateRotateAction)
+        
+        sceneView.scene.rootNode.addChildNode(cubeNode)
+    }
+    
+    
+    
+    @IBAction func addCubeButtonClicked(_ sender: Any) {
+        generateRandomCube()
+    }
+    
+    
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
@@ -45,31 +93,6 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         
         // Pause the view's session
         sceneView.session.pause()
-    }
-
-    // MARK: - ARSCNViewDelegate
     
-/*
-    // Override to create and configure nodes for anchors added to the view's session.
-    func renderer(_ renderer: SCNSceneRenderer, nodeFor anchor: ARAnchor) -> SCNNode? {
-        let node = SCNNode()
-     
-        return node
-    }
-*/
-    
-    func session(_ session: ARSession, didFailWithError error: Error) {
-        // Present an error message to the user
-        
-    }
-    
-    func sessionWasInterrupted(_ session: ARSession) {
-        // Inform the user that the session has been interrupted, for example, by presenting an overlay
-        
-    }
-    
-    func sessionInterruptionEnded(_ session: ARSession) {
-        // Reset tracking and/or remove existing anchors if consistent tracking is required
-        
     }
 }
